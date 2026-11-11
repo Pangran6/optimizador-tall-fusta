@@ -454,7 +454,7 @@ async function rotatedScanBlob(file,angle){
   await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('La fotografia no es pot obrir. Prova amb JPG o PNG.'));image.src=url;});
   const scale=Math.min(1,2400/Math.max(image.naturalWidth,image.naturalHeight)),w=Math.round(image.naturalWidth*scale),h=Math.round(image.naturalHeight*scale),swap=angle%180!==0;
   const canvas=document.createElement('canvas');canvas.width=swap?h:w;canvas.height=swap?w:h;const ctx=canvas.getContext('2d');ctx.translate(canvas.width/2,canvas.height/2);ctx.rotate(angle*Math.PI/180);ctx.drawImage(image,-w/2,-h/2,w,h);
-  return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('No s’ha pogut preparar la imatge.')),'image/jpeg',.92));
+  return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(new File([b],'etiqueta-girada.jpg',{type:'image/jpeg'})):reject(Error('No s’ha pogut preparar la imatge.')),'image/jpeg',.92));
  }finally{URL.revokeObjectURL(url);}
 }
 async function scannerReadPhoto(file){
@@ -462,7 +462,7 @@ async function scannerReadPhoto(file){
  scannerResetPhotoPreview();scannerPhotoUrl=URL.createObjectURL(file);$('scanPhotoPreview').src=scannerPhotoUrl;$('scanPhotoPreview').hidden=false;scannerMessage('Analitzant la fotografia…');
  try{
   await ensureScannerLib();let decoded=null;
-  for(const angle of [0,90,270]){
+  for(const angle of [0,90,180,270]){
    let reader=null;try{
     const source=angle===0?file:await rotatedScanBlob(file,angle);reader=makeImageReader('scanPhotoViewport');
     decoded=await reader.scanFile(source,false);if(decoded)break;
